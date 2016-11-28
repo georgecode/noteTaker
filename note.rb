@@ -17,16 +17,19 @@ SQL
 
 db.execute(create_table)
 
+
+
+# method for createing notes in sql db
 def create_note(db, category, name, note)
   db.execute("INSERT INTO notes (category, name, note) VALUES (?, ?, ?)", [category, name, note])
 end
 
-#create_note(db, "html", "comments", "to create a comment in html use this syntax <!-- comments here -->")
 
 def spacer
-  puts "\n-------------------------\n"
+  puts "\n----------------------------\n"
 end
 
+# method creates a new note
 def new_note(db)
   puts "\nWhat category would you like this note to be saved under?? examples html, css, ruby.....ect."
   category = gets.chomp
@@ -48,34 +51,57 @@ end
 # kittens.each do |kitten|
 #  puts "#{kitten['name']} is #{kitten['age']}"
 # end
+
+# method returns a list of catagories available
 def category_options(db)
-  puts "\nChoose a catagory"
   my_category = db.execute("SELECT * FROM notes")
   options = []
   my_category.each do |category|
     options << category[1]
   end
-  puts options.uniq!
-end
-#array.uniq!
-
-# a = [ "a", "b", "c" ]
-# a.include?("b")   #=> true
-# a.include?("z")   #=> false
-def catagory_results(db)
-
+  options.uniq!
 end
 
+# method checks to see if user made a valid choice
+def category_results(db,options)
+  puts "\nChoose a catagory"
+  puts options
+  choice = gets.chomp
+  if options.include?(choice)
+    puts "you chose #{choice}"
+    choice
+  else
+    puts "\nThats not a choice"
+    category_results(db,options)
+  end
+end
+
+# catagory_results(db,category_options(db))
+search_category = category_results(db,category_options(db))
 
 
 
+#method prints search results
+def search_results(db,choice)
+  spacer
+  puts "----- RESULTS FOR #{choice.upcase} -----"
+  data =db.execute("SELECT * FROM notes")
+  data.each do |note|
+    if note[1] == choice
+      puts "\n #{note[2]} - #{note[3]}"
+    end
+  end
+  spacer
+end
 
+search_results(db,search_category)
 
+#-----------------------------------------
 def search_note(db)
   puts "What category"
 end
 
-def initial_prompt(db)
+def initial_prompt(db,options)
   puts "To create a new note type NEW, to search notes Type SEARCH, to exit type EXIT"
 
   new_search = gets.chomp
@@ -83,7 +109,9 @@ def initial_prompt(db)
   if new_search.downcase == "new"
     new_note(db)
   elsif new_search.downcase == "search"
-    category_options(db)
+    puts "good search"
+    catagory_results(db,options)
+
   elsif new_search.downcase == "exit"
     puts "See you soon!"
   else
@@ -93,7 +121,7 @@ def initial_prompt(db)
   end
 end
 
-initial_prompt(db)
+initial_prompt(db, category_options(db))
 #If new create entry
 
 #If search go to search
