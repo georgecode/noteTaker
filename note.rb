@@ -1,6 +1,5 @@
-#NEW note or SEARCH notes
+# App for takeing notes and searching your notes
 
-#SELECT * FROM notes;
 
 require 'sqlite3'
 
@@ -18,13 +17,12 @@ SQL
 db.execute(create_table)
 
 
-
 # method for createing notes in sql db
 def create_note(db, category, name, note)
   db.execute("INSERT INTO notes (category, name, note) VALUES (?, ?, ?)", [category, name, note])
 end
 
-
+# method for adding a visual seperation in the ui
 def spacer
   puts "\n----------------------------\n"
 end
@@ -43,14 +41,6 @@ def new_note(db)
   create_note(db, category, name, note)
 end
 
-#SELECT name, age FROM table_name;
-#db.execute(SELECT name, age FROM table_name;)
-
-# explore ORM by retrieving data
-# kittens = db.execute("SELECT * FROM kittens")
-# kittens.each do |kitten|
-#  puts "#{kitten['name']} is #{kitten['age']}"
-# end
 
 # method returns a list of catagories available
 def category_options(db)
@@ -64,27 +54,24 @@ end
 
 # method checks to see if user made a valid choice
 def category_results(db,options)
+  spacer
   puts "\nChoose a catagory"
   puts options
   choice = gets.chomp
   if options.include?(choice)
-    puts "you chose #{choice}"
     choice
   else
-    puts "\nThats not a choice"
+    spacer
+    puts "\n---- Thats not a choice ----"
     category_results(db,options)
   end
 end
-
-# catagory_results(db,category_options(db))
-search_category = category_results(db,category_options(db))
-
 
 
 #method prints search results
 def search_results(db,choice)
   spacer
-  puts "----- RESULTS FOR #{choice.upcase} -----"
+  puts "------ RESULTS FOR #{choice.upcase} -----"
   data =db.execute("SELECT * FROM notes")
   data.each do |note|
     if note[1] == choice
@@ -94,13 +81,8 @@ def search_results(db,choice)
   spacer
 end
 
-search_results(db,search_category)
 
-#-----------------------------------------
-def search_note(db)
-  puts "What category"
-end
-
+# user prompt
 def initial_prompt(db,options)
   puts "To create a new note type NEW, to search notes Type SEARCH, to exit type EXIT"
 
@@ -108,22 +90,21 @@ def initial_prompt(db,options)
 
   if new_search.downcase == "new"
     new_note(db)
+
   elsif new_search.downcase == "search"
-    puts "good search"
-    catagory_results(db,options)
+    results = category_results(db,options)
+    search_results(db,results)
 
   elsif new_search.downcase == "exit"
     puts "See you soon!"
+
   else
     spacer
-    puts "\nThats not a choice\n"
-    initial_prompt(db)
+    puts "\n---- Thats not a choice ----\n"
+    spacer
+    initial_prompt(db,options)
   end
 end
 
+#driver
 initial_prompt(db, category_options(db))
-#If new create entry
-
-#If search go to search
-
-#
